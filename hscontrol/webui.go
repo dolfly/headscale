@@ -17,6 +17,6 @@ func web(router *mux.Router) {
 		if err != nil {
 			return nil
 		}
-		return http.FileServer(zfs)
+		return http.StripPrefix("/web", http.FileServer(zfs))
 	}())
 }
