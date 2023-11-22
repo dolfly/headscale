@@ -22,7 +22,6 @@ import (
 	"github.com/gorilla/mux"
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcRuntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/juanfont/headscale"
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
 	"github.com/juanfont/headscale/hscontrol/db"
 	"github.com/juanfont/headscale/hscontrol/derp"
@@ -443,7 +442,7 @@ func (h *Headscale) ensureUnixSocketIsAbsent() error {
 
 func (h *Headscale) createRouter(grpcMux *grpcRuntime.ServeMux) *mux.Router {
 	router := mux.NewRouter()
-	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
+	//router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 
 	router.HandleFunc(ts2021UpgradePath, h.NoiseUpgradeHandler).Methods(http.MethodPost)
 
@@ -462,9 +461,9 @@ func (h *Headscale) createRouter(grpcMux *grpcRuntime.ServeMux) *mux.Router {
 		Methods(http.MethodGet)
 
 	// TODO(kristoffer): move swagger into a package
-	router.HandleFunc("/swagger", headscale.SwaggerUI).Methods(http.MethodGet)
-	router.HandleFunc("/swagger/v1/openapiv2.json", headscale.SwaggerAPIv1).
-		Methods(http.MethodGet)
+	// router.HandleFunc("/swagger", headscale.SwaggerUI).Methods(http.MethodGet)
+	// router.HandleFunc("/swagger/v1/openapiv2.json", headscale.SwaggerAPIv1).
+	// 	Methods(http.MethodGet)
 
 	if h.cfg.DERP.ServerEnabled {
 		router.HandleFunc("/derp", h.DERPServer.DERPHandler)
@@ -475,9 +474,8 @@ func (h *Headscale) createRouter(grpcMux *grpcRuntime.ServeMux) *mux.Router {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.Use(h.httpAuthenticationMiddleware)
 	apiRouter.PathPrefix("/v1/").HandlerFunc(grpcMux.ServeHTTP)
-
+	web(router)
 	router.PathPrefix("/").HandlerFunc(notFoundHandler)
-
 	return router
 }
 
